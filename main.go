@@ -29,6 +29,8 @@ func main() {
 
 	dbQueries := database.New(db)
 	const filepathRoot = "."
+	// Si hay problemas porque el puerto esta bloqueado: sudo lsof -i :8080
+	// Y despues realizar el: sudo kill -9 <PID>
 	const port = "8080"
 
 	apiCfg := apiConfig{
@@ -48,6 +50,7 @@ func main() {
 	mux.HandleFunc("GET /api/chirps/{chirpID}", apiCfg.handlerChirpsGet)
 	mux.HandleFunc("POST /api/chirps", apiCfg.handlerChirpsCreate)
 
+	mux.HandleFunc("POST /api/login", apiCfg.handlerUsersLogin)
 	mux.HandleFunc("POST /admin/reset", apiCfg.handlerReset)
 	mux.HandleFunc("GET /admin/metrics", apiCfg.handlerMetrics)
 

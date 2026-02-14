@@ -10,7 +10,7 @@ func (cfg *apiConfig) handlerReset(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cfg.fileserverHits.Store(0)
-	err := cfg.queries.DeleteUsers(r.Context())
+	err := cfg.queries.Reset(r.Context())
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to reset the database: " + err.Error()))
