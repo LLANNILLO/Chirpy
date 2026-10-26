@@ -41,7 +41,8 @@ func (cfg *apiConfig) handlerChirpsList(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	var chirps []Chirp
+	// Initialized (not nil) so an empty result is encoded as [] instead of null.
+	chirps := []Chirp{}
 
 	if authorID != uuid.Nil {
 		dbChirps, err := cfg.queries.ListChirpsByAuthor(r.Context(), authorID)

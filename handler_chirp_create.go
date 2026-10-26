@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/google/uuid"
 	"github.com/llannillo/Chirpy/internal/auth"
@@ -71,7 +72,7 @@ func (cfg *apiConfig) handlerChirpsCreate(w http.ResponseWriter, r *http.Request
 
 func validateChirp(body string) (string, error) {
 	const maxChirpLength = 140
-	if len(body) > maxChirpLength {
+	if utf8.RuneCountInString(body) > maxChirpLength {
 		return "", errors.New("Chirp is too long")
 	}
 

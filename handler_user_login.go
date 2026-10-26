@@ -1,7 +1,9 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"time"
 
@@ -30,6 +32,11 @@ func (cfg *apiConfig) handlerUsersLogin(w http.ResponseWriter, r *http.Request) 
 
 	user, err := cfg.queries.GetUserByEmail(r.Context(), params.Email)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			// Same response as a wrong password, so registered emails can't be discovered.
+			respondWithError(w, http.StatusUnauthorized, "incorrect email or password", err)
+			return
+		}
 		respondWithError(w, http.StatusInternalServerError, "Couldn't get the user", err)
 		return
 	}
@@ -57,11 +64,15 @@ func (cfg *apiConfig) handlerUsersLogin(w http.ResponseWriter, r *http.Request) 
 	}
 
 	expiresAt := time.Now().Add(time.Hour * 24 * 60)
-	cfg.queries.CreateRefresh(r.Context(), database.CreateRefreshParams{
+	_, err = cfg.queries.CreateRefresh(r.Context(), database.CreateRefreshParams{
 		Token:     refreshToken,
 		UserID:    user.ID,
 		ExpiresAt: expiresAt,
 	})
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Couldn't save refresh token", err)
+		return
+	}
 
 	respondWithJSON(w, http.StatusOK, response{
 		User: User{
